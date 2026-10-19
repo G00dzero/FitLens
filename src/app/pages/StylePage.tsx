@@ -1,136 +1,80 @@
+import { Box, Combine, Plus, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
-import { Upload, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { ModelPreview } from "../components/ModelPreview";
+import { mergeModels } from "../../lib/garment3d";
 
-export function StylePage() {
-  const [item1, setItem1] = useState<string | null>(null);
-  const [item2, setItem2] = useState<string | null>(null);
+type StylePageProps = {
+  bodyModelUrl: string | null;
+  bodyPreviewUrl: string | null;
+  garmentModelUrl: string | null;
+  garmentPreviewUrl: string | null;
+  mergedModelUrl: string | null;
+  mergedPreviewUrl: string | null;
+  onOpenGarment: () => void;
+};
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, itemNum: 1 | 2) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        if (itemNum === 1) {
-          setItem1(result);
-        } else {
-          setItem2(result);
-        }
-      };
-      reader.readAsDataURL(file);
+export function StylePage({ bodyModelUrl, bodyPreviewUrl, garmentModelUrl, garmentPreviewUrl, mergedModelUrl, mergedPreviewUrl, onOpenGarment }: StylePageProps) {
+  const [isMerging, setIsMerging] = useState(false);
+  const [mergeError, setMergeError] = useState("");
+  const [localMergedModelUrl, setLocalMergedModelUrl] = useState<string | null>(mergedModelUrl);
+  const [localMergedPreviewUrl, setLocalMergedPreviewUrl] = useState<string | null>(mergedPreviewUrl);
+
+  const handleMerge = async () => {
+    if (!bodyModelUrl || !garmentModelUrl) return;
+    setIsMerging(true);
+    setMergeError("");
+    try {
+      const result = await mergeModels(bodyModelUrl, garmentModelUrl);
+      setLocalMergedModelUrl(result.modelUrl);
+      setLocalMergedPreviewUrl(result.previewUrl ?? null);
+    } catch (error) {
+      setMergeError(error instanceof Error ? error.message : "Unable to merge the body and garment models.");
+    } finally {
+      setIsMerging(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background pt-24 px-6 pb-12">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-4xl font-bold mb-2">Style Creator</h1>
-          <p className="text-muted-foreground mb-12">Combine two clothing items to create a unique style</p>
-
-          <div className="grid md:grid-cols-3 gap-8 items-start">
-            {/* First Item */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">First Item</h2>
-              <label className="block">
-                <div className="relative h-56 rounded-lg bg-card border-2 border-dashed border-border hover:border-purple-500 transition-colors cursor-pointer flex items-center justify-center group">
-                  {item1 ? (
-                    <>
-                      <img
-                        src={item1}
-                        alt="First item"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setItem1(null);
-                        }}
-                        className="absolute top-2 right-2 p-2 bg-black/50 rounded-lg hover:bg-black/70 transition-all"
-                      >
-                        <X size={20} className="text-white" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="text-center">
-                      <Upload size={32} className="mx-auto mb-2 text-muted-foreground group-hover:text-purple-500 transition-colors" />
-                      <p className="text-sm text-muted-foreground">Upload item</p>
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handlePhotoUpload(e, 1)}
-                  className="hidden"
-                />
-              </label>
+    <div className="min-h-screen bg-background px-6 pb-12 pt-24">
+      <div className="mx-auto max-w-6xl">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="mb-10 flex items-start justify-between gap-4">
+            <div>
+              <p className="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Style workspace</p>
+              <h1 className="mb-2 text-4xl font-bold">Assemble your final fit</h1>
+              <p className="max-w-2xl text-muted-foreground">Your generated body stays here while you add a 3D garment, reconstruct one from an image, and merge both models.</p>
             </div>
-
-            {/* Plus Sign */}
-            <div className="flex items-center justify-center h-56">
-              <div className="text-4xl text-muted-foreground">
-                <Plus size={48} />
-              </div>
-            </div>
-
-            {/* Second Item */}
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Second Item</h2>
-              <label className="block">
-                <div className="relative h-56 rounded-lg bg-card border-2 border-dashed border-border hover:border-purple-500 transition-colors cursor-pointer flex items-center justify-center group">
-                  {item2 ? (
-                    <>
-                      <img
-                        src={item2}
-                        alt="Second item"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setItem2(null);
-                        }}
-                        className="absolute top-2 right-2 p-2 bg-black/50 rounded-lg hover:bg-black/70 transition-all"
-                      >
-                        <X size={20} className="text-white" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="text-center">
-                      <Upload size={32} className="mx-auto mb-2 text-muted-foreground group-hover:text-purple-500 transition-colors" />
-                      <p className="text-sm text-muted-foreground">Upload item</p>
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handlePhotoUpload(e, 2)}
-                  className="hidden"
-                />
-              </label>
-            </div>
+            <Sparkles className="mt-2 text-primary" size={28} />
           </div>
 
-          {item1 && item2 && (
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-              className="mt-12 px-8 py-4 rounded-lg bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
-            >
-              Create Style
-            </motion.button>
-          )}
+          <div className="grid gap-5 lg:grid-cols-2">
+            <section className="rounded-xl border border-border bg-card p-5" aria-labelledby="body-model-heading">
+              <div className="mb-4 flex items-center gap-3"><Box className="text-primary" size={20} /><div><h2 id="body-model-heading" className="font-semibold">Generated body</h2><p className="text-xs text-muted-foreground">From your body video</p></div></div>
+              {bodyModelUrl ? <ModelPreview modelUrl={bodyModelUrl} label="Generated 3D body" /> : <div className="flex min-h-[260px] items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">Generate a body model from Try-On first.</div>}
+              {bodyPreviewUrl && <p className="mt-3 text-xs text-muted-foreground">Body reconstruction preview available.</p>}
+            </section>
+
+            <section className="rounded-xl border border-border bg-card p-5" aria-labelledby="garment-model-heading">
+              <div className="mb-4 flex items-center gap-3"><Box className="text-primary" size={20} /><div><h2 id="garment-model-heading" className="font-semibold">Garment model</h2><p className="text-xs text-muted-foreground">Direct 3D upload or image reconstruction</p></div></div>
+              {garmentModelUrl ? <ModelPreview modelUrl={garmentModelUrl} label="Generated 3D garment" /> : <div className="flex min-h-[260px] flex-col items-center justify-center rounded-lg bg-muted px-6 text-center"><Plus className="mb-3 text-muted-foreground" size={30} /><p className="text-sm text-muted-foreground">No garment model has been added yet.</p></div>}
+              <button type="button" onClick={onOpenGarment} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-primary px-4 py-3 font-semibold text-primary hover:bg-primary/10"><Plus size={18} /> {garmentModelUrl ? "Replace garment" : "Add garment"}</button>
+              {garmentPreviewUrl && <p className="mt-3 text-xs text-muted-foreground">Garment reconstruction preview available.</p>}
+            </section>
+          </div>
+
+          <section className="mt-5 rounded-xl border border-border bg-card p-5" aria-labelledby="merge-heading">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div><h2 id="merge-heading" className="font-semibold">Final combined model</h2><p className="text-sm text-muted-foreground">Merge the generated body and garment into one 3D result.</p></div>
+              <button type="button" onClick={handleMerge} disabled={!bodyModelUrl || !garmentModelUrl || isMerging} className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"><Combine size={18} /> {isMerging ? "Merging models..." : "Merge mock-ups"}</button>
+            </div>
+            {mergeError && <p role="alert" className="mt-4 text-sm text-destructive">{mergeError}</p>}
+            {localMergedModelUrl ? <div className="mt-5 overflow-hidden rounded-lg"><ModelPreview modelUrl={localMergedModelUrl} label="Final combined 3D fit" />{localMergedPreviewUrl && <p className="mt-2 text-xs text-muted-foreground">Final combined preview available.</p>}</div> : <p className="mt-4 text-xs text-muted-foreground">Both model cards must be ready before merging.</p>}
+          </section>
         </motion.div>
       </div>
     </div>
   );
 }
+
+export default StylePage;

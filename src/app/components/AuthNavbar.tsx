@@ -5,7 +5,7 @@ import { ThemeToggle } from "./ThemeToggle";
 
 interface AuthNavbarProps {
   onLogout: () => void;
-  onPageChange: (page: "tryon" | "history" | "style") => void;
+  onPageChange: (page: "tryon" | "history" | "style" | "garment") => void;
 }
 
 export function AuthNavbar({ onLogout, onPageChange }: AuthNavbarProps) {

@@ -6,13 +6,14 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { LoginRegisterModal } from "./components/LoginRegisterModal";
 import { TryOnPage } from "./pages/TryOnPage";
 import { HistoryPage } from "./pages/HistoryPage";
-import { StylePage } from "./pages/StylePage";
+import StylePage from "./pages/StylePage";
+import { GarmentPage } from "./pages/GarmentPage";
 import { motion } from "motion/react";
 import { onAuthStateChanged, signInAnonymously, signOut, User } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 import { auth } from "../lib/firebase";
 
-type AuthPage = "tryon" | "history" | "style";
+type AuthPage = "tryon" | "history" | "style" | "garment";
 
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,6 +21,13 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<AuthPage>("tryon");
+  const [tryOnResultUrl, setTryOnResultUrl] = useState<string | null>(null);
+  const [bodyModelUrl, setBodyModelUrl] = useState<string | null>(null);
+  const [bodyPreviewUrl, setBodyPreviewUrl] = useState<string | null>(null);
+  const [garmentModelUrl, setGarmentModelUrl] = useState<string | null>(null);
+  const [garmentPreviewUrl, setGarmentPreviewUrl] = useState<string | null>(null);
+  const [mergedModelUrl, setMergedModelUrl] = useState<string | null>(null);
+  const [mergedPreviewUrl, setMergedPreviewUrl] = useState<string | null>(null);
   const signOutRequested = useRef(false);
 
   useEffect(() => onAuthStateChanged(
@@ -71,9 +79,10 @@ export default function App() {
           <FloatingClothes />
           <div className="relative z-10">
             <AuthNavbar onLogout={handleLogout} onPageChange={setCurrentPage} />
-            {currentPage === "tryon" && <TryOnPage userId={user.uid} />}
+            {currentPage === "tryon" && <TryOnPage userId={user.uid} renderedResultUrl={tryOnResultUrl} onOpenStyle={(modelUrl, previewUrl) => { setBodyModelUrl(modelUrl); setBodyPreviewUrl(previewUrl ?? null); setCurrentPage("style"); }} />}
             {currentPage === "history" && <HistoryPage userId={user.uid} />}
-            {currentPage === "style" && <StylePage />}
+            {currentPage === "style" && <StylePage bodyModelUrl={bodyModelUrl} bodyPreviewUrl={bodyPreviewUrl} garmentModelUrl={garmentModelUrl} garmentPreviewUrl={garmentPreviewUrl} mergedModelUrl={mergedModelUrl} mergedPreviewUrl={mergedPreviewUrl} onOpenGarment={() => setCurrentPage("garment")} />}
+            {currentPage === "garment" && <GarmentPage onBack={() => setCurrentPage("style")} onComplete={(modelUrl, previewUrl) => { setGarmentModelUrl(modelUrl); setGarmentPreviewUrl(previewUrl ?? null); setCurrentPage("style"); }} />}
           </div>
         </div>
       </ThemeProvider>
