@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Ruler, Sparkles, Upload, Video } from "lucide-react";
+import { Image, LoaderCircle, Ruler, Sparkles, Upload } from "lucide-react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -252,8 +252,8 @@ export function TryOnPage({ userId, renderedResultUrl, onOpenStyle }: { userId: 
   const [isSaving, setIsSaving] = useState(false);
   const [saveProgress, setSaveProgress] = useState(0);
   const [persistenceError, setPersistenceError] = useState("");
-  const [bodyVideo, setBodyVideo] = useState<File | null>(null);
-  const [bodyVideoUrl, setBodyVideoUrl] = useState<string | null>(null);
+  const [bodyImage, setBodyImage] = useState<File | null>(null);
+  const [bodyImageUrl, setBodyImageUrl] = useState<string | null>(null);
   const [bodyModelUrl, setBodyModelUrl] = useState<string | null>(null);
   const [bodyPreviewUrl, setBodyPreviewUrl] = useState<string | null>(null);
   const [bodyStatus, setBodyStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
@@ -293,12 +293,12 @@ export function TryOnPage({ userId, renderedResultUrl, onOpenStyle }: { userId: 
   const fitEstimate = getFitEstimate(activeMeasurements);
   const isBodyReady = bodyStatus === "ready" && Boolean(bodyModelUrl);
 
-  const handleBodyVideo = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBodyImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (bodyVideoUrl) URL.revokeObjectURL(bodyVideoUrl);
-    setBodyVideo(file);
-    setBodyVideoUrl(URL.createObjectURL(file));
+    if (bodyImageUrl) URL.revokeObjectURL(bodyImageUrl);
+    setBodyImage(file);
+    setBodyImageUrl(URL.createObjectURL(file));
     setBodyModelUrl(null);
     setBodyPreviewUrl(null);
     setBodyStatus("idle");
@@ -306,11 +306,11 @@ export function TryOnPage({ userId, renderedResultUrl, onOpenStyle }: { userId: 
   };
 
   const handleBodyGeneration = async () => {
-    if (!bodyVideo) return;
+    if (!bodyImage) return;
     setBodyStatus("generating");
     setBodyError("");
     try {
-      const result = await generateBody3D(bodyVideo);
+      const result = await generateBody3D(bodyImage);
       setBodyModelUrl(result.modelUrl);
       setBodyPreviewUrl(result.previewUrl ?? null);
       setBodyStatus("ready");
@@ -389,12 +389,12 @@ export function TryOnPage({ userId, renderedResultUrl, onOpenStyle }: { userId: 
           <h1 className="mb-2 text-3xl font-bold sm:text-4xl">3D Virtual Try-On</h1>
           <p className="mb-7 max-w-2xl text-sm text-muted-foreground sm:mb-10 sm:text-base">Shape a private 3D fit profile, choose a size, and preview how the garment will sit on your proportions.</p>
 
-          <section className="mb-5 rounded-xl border border-border bg-card p-4 sm:p-6" aria-labelledby="body-video-heading">
+          <section className="mb-5 rounded-xl border border-border bg-card p-4 sm:p-6" aria-labelledby="body-image-heading">
             <div className="mb-5 flex items-center gap-3">
-              <Video className="text-primary" size={22} />
+              <Image className="text-primary" size={22} />
               <div>
-                <h2 id="body-video-heading" className="text-xl font-semibold">Step 1: Generate your 3D body</h2>
-                <p className="text-sm text-muted-foreground">Upload a short full-body video, then customize the generated representation.</p>
+                <h2 id="body-image-heading" className="text-xl font-semibold">Step 1: Generate your 3D body</h2>
+                <p className="text-sm text-muted-foreground">Upload a clear full-body image for ICON to create your 3D representation.</p>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
@@ -402,17 +402,18 @@ export function TryOnPage({ userId, renderedResultUrl, onOpenStyle }: { userId: 
                 <div className="flex items-center gap-3">
                   <Upload className="text-primary" size={20} />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium">{bodyVideo ? bodyVideo.name : "Choose a body video"}</p>
-                    <p className="text-xs text-muted-foreground">MP4, WebM, or MOV up to 100 MB</p>
+                    <p className="text-sm font-medium">{bodyImage ? bodyImage.name : "Choose a full-body image"}</p>
+                    <p className="text-xs text-muted-foreground">JPG, PNG, or WebP up to 25 MB</p>
                   </div>
                 </div>
-                <input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={handleBodyVideo} className="hidden" />
+                <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleBodyImage} className="hidden" />
               </label>
-              <button type="button" onClick={handleBodyGeneration} disabled={!bodyVideo || bodyStatus === "generating"} className="rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">
-                {bodyStatus === "generating" ? "Generating 3D body..." : isBodyReady ? "Regenerate 3D body" : "Generate 3D body"}
+              <button type="button" onClick={handleBodyGeneration} disabled={!bodyImage || bodyStatus === "generating"} className="rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">
+                {bodyStatus === "generating" ? <span className="inline-flex items-center gap-2"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> Generating 3D body...</span> : isBodyReady ? "Regenerate 3D body" : "Generate 3D body"}
               </button>
             </div>
-            {bodyVideoUrl && <video src={bodyVideoUrl} controls className="mt-4 max-h-64 w-full rounded-lg bg-muted object-contain" aria-label="Uploaded body video preview" />}
+            {bodyImageUrl && <img src={bodyImageUrl} className="mt-4 max-h-64 w-full rounded-lg bg-muted object-contain" alt="Uploaded full-body image preview" />}
+            {bodyStatus === "generating" && <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground" role="status" aria-live="polite"><LoaderCircle size={16} className="animate-spin text-primary" aria-hidden="true" /> ICON is generating your 3D model. This may take a few minutes; please keep this page open.</p>}
             {bodyStatus === "ready" && <p className="mt-3 text-sm text-emerald-600">3D body generated. Custom measurements are now available below.</p>}
             {bodyError && <p role="alert" className="mt-3 text-sm text-destructive">{bodyError}</p>}
           </section>

@@ -50,7 +50,7 @@ export function StylePage({ bodyModelUrl, bodyPreviewUrl, garmentModelUrl, garme
 
           <div className="grid gap-5 lg:grid-cols-2">
             <section className="rounded-xl border border-border bg-card p-5" aria-labelledby="body-model-heading">
-              <div className="mb-4 flex items-center gap-3"><Box className="text-primary" size={20} /><div><h2 id="body-model-heading" className="font-semibold">Generated body</h2><p className="text-xs text-muted-foreground">From your body video</p></div></div>
+              <div className="mb-4 flex items-center gap-3"><Box className="text-primary" size={20} /><div><h2 id="body-model-heading" className="font-semibold">Generated body</h2><p className="text-xs text-muted-foreground">From your full-body image</p></div></div>
               {bodyModelUrl ? <ModelPreview modelUrl={bodyModelUrl} label="Generated 3D body" /> : <div className="flex min-h-[260px] items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">Generate a body model from Try-On first.</div>}
               {bodyPreviewUrl && <p className="mt-3 text-xs text-muted-foreground">Body reconstruction preview available.</p>}
             </section>

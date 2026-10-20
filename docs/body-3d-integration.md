@@ -1,12 +1,12 @@
-# Video-to-3D body integration
+# Image-to-3D body integration
 
 ## Workflow
 
 The Try-On page now follows this order:
 
-1. The user uploads a short full-body video.
-2. FitLens validates the file and sends it as multipart field `video` to `VITE_BODY_3D_API_URL`.
-3. The body service reconstructs a 3D human model and returns a browser-readable glTF or GLB URL.
+1. The user uploads a clear full-body image.
+2. FitLens validates the file and sends it as multipart field `image` to `VITE_BODY_3D_API_URL`.
+3. ICON reconstructs a 3D clothed human model and returns a browser-readable GLB URL.
 4. Three.js loads that model into the preview.
 5. The S/M/L and exact measurement controls become available.
 6. The user saves the fit and continues to garment selection and VITON-HD.
@@ -17,7 +17,7 @@ Request:
 
 ```text
 POST multipart/form-data
-video=<body video>
+image=<body image>
 ```
 
 Response:

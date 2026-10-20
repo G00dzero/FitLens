@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-FitLens is a web application for exploring virtual clothing fit. Its current experience combines user authentication, fit-profile measurements, a video-to-3D-body service contract, a Three.js preview, style-image uploads, and a planned connection to an external VITON-HD inference service.
+FitLens is a web application for exploring virtual clothing fit. Its current experience combines user authentication, fit-profile measurements, an image-to-3D-body service contract for ICON, a Three.js preview, style-image uploads, and a planned connection to an external VITON-HD inference service.
 
 The project is in an active prototype stage. The interface and core data flow are implemented, while the production-grade computer-vision pipeline, true 3D garment reconstruction, persistent generated media, and broader validation are still being researched.
 
@@ -142,9 +142,9 @@ The setup contract and limitations are documented separately in `docs/viton-inte
 - Custom measurement handoff preserved after generation.
 - Integration documentation added.
 
-### Video-to-3D body workflow completed at integration level
+### Image-to-3D body workflow completed at integration level
 
-- Body video upload added to the Try-On page.
+- Full-body image upload added to the Try-On page for ICON.
 - MP4, WebM, and MOV validation added with a 100 MB limit.
 - Configurable `VITE_BODY_3D_API_URL` added.
 - glTF/GLB model response contract added.
